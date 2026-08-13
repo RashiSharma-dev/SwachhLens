@@ -1238,7 +1238,7 @@ const AuthScreen = () => {
   const submitToBackend = async () => {
     setIsLoading(true);
     try {
-      const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const API = import.meta.env.VITE_API_URL || 'https://swachhlens-vqp0.onrender.com';
       if (isLogin) {
         const username = role === 'citizen' ? mobile : email;
         const res = await fetch(`${API}/api/auth/login`, {
