@@ -1203,17 +1203,12 @@ const AuthScreen = () => {
   // per-field errors
   const [errs, setErrs] = useState({});
 
-  // OTP step (citizen signup only)
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [otpErr, setOtpErr] = useState('');
-
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   // reset state when switching login/signup or role
   const reset = () => {
-    setErrs({}); setOtpSent(false); setOtp(''); setOtpErr('');
+    setErrs({});
     setMobile(''); setEmail(''); setPassword(''); setEmpId('');
   };
 
@@ -1234,29 +1229,8 @@ const AuthScreen = () => {
     return Object.keys(e).length === 0;
   };
 
-  // --- citizen signup OTP flow ---
-  const handleSendOtp = (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-    // simulate OTP send
-    setOtpSent(true);
-    toast.success('OTP sent! Use 1234 to verify.', { icon: '📱' });
-  };
-
-  const handleVerifyOtp = (e) => {
-    e.preventDefault();
-    if (otp !== '1234') { setOtpErr('Incorrect OTP. Please try again.'); return; }
-    setOtpErr('');
-    submitToBackend();
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    // citizen signup goes through OTP gate first
-    if (!isLogin && role === 'citizen' && !otpSent) {
-      handleSendOtp(e);
-      return;
-    }
     if (!validate()) return;
     submitToBackend();
   };
@@ -1326,35 +1300,7 @@ const AuthScreen = () => {
             <button id="tab-signup" onClick={() => { setIsLogin(false); reset(); }} className={`flex-1 py-3 font-bold rounded-xl text-sm transition-all ${!isLogin ? 'bg-white text-emerald-700 shadow border border-slate-100' : 'text-slate-500 hover:text-slate-700'}`}>Sign Up</button>
           </div>
 
-          {/* OTP verification screen (citizen signup only) */}
-          {!isLogin && role === 'citizen' && otpSent ? (
-            <form onSubmit={handleVerifyOtp} className="space-y-5">
-              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm text-emerald-700 font-semibold">
-                📱 OTP sent to <span className="font-black">{mobile}</span>. Enter it below.
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm font-bold text-slate-700 pl-1">Enter OTP</label>
-                <input
-                  id="otp-input"
-                  type="text"
-                  value={otp}
-                  onChange={e => { setOtp(e.target.value); setOtpErr(''); }}
-                  placeholder="e.g. 1234"
-                  maxLength={6}
-                  className={`w-full bg-slate-50 border rounded-xl p-4 text-slate-700 focus:outline-none focus:ring-2 font-semibold shadow-sm text-center text-2xl tracking-[0.5em] ${
-                    otpErr ? 'border-red-400 focus:ring-red-400 bg-red-50/50' : 'border-slate-200 focus:ring-emerald-500'
-                  }`}
-                />
-                <FieldError msg={otpErr} />
-              </div>
-              <button type="submit" disabled={isLoading} className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] transition-all text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-200 flex justify-center items-center gap-2">
-                {isLoading ? <div className="w-6 h-6 rounded-full border-2 border-white/30 border-t-white animate-spin"></div> : 'Verify & Create Account'}
-              </button>
-              <button type="button" onClick={() => { setOtpSent(false); setOtp(''); setOtpErr(''); }} className="w-full text-sm text-slate-500 hover:text-slate-700 font-semibold py-2 transition-colors">
-                ← Change phone number
-              </button>
-            </form>
-          ) : (
+
             <form onSubmit={handleSubmit} className="space-y-5" noValidate>
               {/* Role selector */}
               <div className="space-y-2">
@@ -1427,22 +1373,14 @@ const AuthScreen = () => {
                 <FieldError msg={errs.password} />
               </div>
 
-              {/* OTP hint for citizen signup */}
-              {!isLogin && role === 'citizen' && (
-                <p className="text-xs text-slate-400 font-medium pl-1">
-                  📱 After entering details, an OTP will be sent to your mobile for verification.
-                </p>
-              )}
-
               <div className="pt-2">
                 <button id="submit-btn" type="submit" disabled={isLoading} className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] transition-all text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-200 flex justify-center items-center gap-2">
                   {isLoading
                     ? <div className="w-6 h-6 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
-                    : isLogin ? 'Sign In Securely' : (!isLogin && role === 'citizen' ? 'Send OTP & Continue' : 'Create Account')}
+                    : isLogin ? 'Sign In Securely' : 'Create Account'}
                 </button>
               </div>
             </form>
-          )}
         </div>
       </div>
     </div>
