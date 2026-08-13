@@ -26,13 +26,19 @@ def get_db():
     finally: db.close()
 
 app = FastAPI(title="SwachhLens API")
-# FRONTEND_URL env var = your Netlify URL e.g. https://swachhlens.netlify.app
+# Allow all Netlify domains and localhost
 _origins = [
-    os.getenv("FRONTEND_URL", "http://localhost:5173"),
     "http://localhost:5173",
     "http://localhost:4173",
 ]
-app.add_middleware(CORSMiddleware, allow_origins=_origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(
+    CORSMiddleware, 
+    allow_origins=_origins, 
+    allow_origin_regex=r"https://.*\.netlify\.app",
+    allow_credentials=True, 
+    allow_methods=["*"], 
+    allow_headers=["*"]
+)
 
 # --- JWT Config & Mock Users DB (ponytail style) ---
 SECRET_KEY = "mock_super_secret_key_ponytail"
